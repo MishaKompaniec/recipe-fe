@@ -1,15 +1,33 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   useGetAllRecipesQuery,
   useGetMyRecipesQuery,
   useCreateRecipeMutation,
+  useUpdateRecipeMutation,
 } from '../../store/services/api';
 import RecipeCard from '../../components/recipeCard';
+
+type RecipeFormData = {
+  title: string;
+  description: string;
+  ingredients: string[];
+  instructions: string;
+};
+
+const initialFormData: RecipeFormData = {
+  title: '',
+  description: '',
+  ingredients: [],
+  instructions: '',
+};
 
 const HomePage = () => {
   const [search, setSearch] = useState('');
   const [showMyRecipes, setShowMyRecipes] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<
+    (RecipeFormData & { id: number | string }) | null
+  >(null);
 
   const {
     data: allRecipes,
@@ -26,6 +44,7 @@ const HomePage = () => {
   });
 
   const [createRecipe, { isLoading: isCreating }] = useCreateRecipeMutation();
+  const [updateRecipe, { isLoading: isUpdating }] = useUpdateRecipeMutation();
 
   const recipes = showMyRecipes ? myRecipes : allRecipes;
   const loading = showMyRecipes ? myLoading : allLoading;
@@ -38,14 +57,24 @@ const HomePage = () => {
     );
   }, [recipes, search]);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    ingredients: [] as string[],
-    instructions: '',
-  });
-
+  const [formData, setFormData] = useState<RecipeFormData>(initialFormData);
   const [newIngredient, setNewIngredient] = useState('');
+
+  // При открытии модалки для редактирования - подставляем данные
+  useEffect(() => {
+    if (editingRecipe) {
+      setFormData({
+        title: editingRecipe.title,
+        description: editingRecipe.description,
+        ingredients: editingRecipe.ingredients,
+        instructions: editingRecipe.instructions,
+      });
+      setModalOpen(true);
+    } else {
+      setFormData(initialFormData);
+      setNewIngredient('');
+    }
+  }, [editingRecipe]);
 
   const addIngredient = () => {
     const trimmed = newIngredient.trim();
@@ -76,18 +105,24 @@ const HomePage = () => {
     e.preventDefault();
 
     try {
-      await createRecipe(formData).unwrap();
+      if (editingRecipe) {
+        // обновляем рецепт
+        await updateRecipe({ id: editingRecipe.id, ...formData }).unwrap();
+      } else {
+        // создаём новый
+        await createRecipe(formData).unwrap();
+      }
       setModalOpen(false);
-      setFormData({
-        title: '',
-        description: '',
-        ingredients: [],
-        instructions: '',
-      });
+      setEditingRecipe(null);
+      setFormData(initialFormData);
       setNewIngredient('');
     } catch (error) {
-      console.error('Ошибка при создании рецепта:', error);
+      console.error('Ошибка при сохранении рецепта:', error);
     }
+  };
+
+  const handleEdit = (recipe: any) => {
+    setEditingRecipe(recipe);
   };
 
   if (loading) return <div className='p-4'>Загрузка рецептов...</div>;
@@ -114,7 +149,10 @@ const HomePage = () => {
 
         <button
           className='bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-          onClick={() => setModalOpen(true)}
+          onClick={() => {
+            setEditingRecipe(null);
+            setModalOpen(true);
+          }}
         >
           Добавить рецепт
         </button>
@@ -128,10 +166,7 @@ const HomePage = () => {
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              onClick={() => {
-                // Например, переход на страницу рецепта
-                // router.push(`/recipes/${recipe.id}`);
-              }}
+              onEdit={() => handleEdit(recipe)}
             />
           ))}
         </div>
@@ -140,7 +175,9 @@ const HomePage = () => {
       {modalOpen && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto'>
-            <h2 className='text-2xl font-bold mb-4'>Создать рецепт</h2>
+            <h2 className='text-2xl font-bold mb-4'>
+              {editingRecipe ? 'Редактировать рецепт' : 'Создать рецепт'}
+            </h2>
             <form onSubmit={handleSubmit} className='space-y-4'>
               <input
                 name='title'
@@ -214,18 +251,27 @@ const HomePage = () => {
               <div className='flex justify-end space-x-4'>
                 <button
                   type='button'
-                  onClick={() => setModalOpen(false)}
+                  onClick={() => {
+                    setModalOpen(false);
+                    setEditingRecipe(null);
+                  }}
                   className='px-4 py-2 rounded border border-gray-400 hover:bg-gray-100'
-                  disabled={isCreating}
+                  disabled={isCreating || isUpdating}
                 >
                   Отмена
                 </button>
                 <button
                   type='submit'
-                  disabled={isCreating}
+                  disabled={isCreating || isUpdating}
                   className='bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded'
                 >
-                  {isCreating ? 'Создание...' : 'Создать'}
+                  {isCreating || isUpdating
+                    ? editingRecipe
+                      ? 'Сохранение...'
+                      : 'Создание...'
+                    : editingRecipe
+                    ? 'Сохранить'
+                    : 'Создать'}
                 </button>
               </div>
             </form>
