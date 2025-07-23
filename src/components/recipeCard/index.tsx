@@ -86,6 +86,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         <EditIcon />
       </button>
       <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
+      {recipe.description && (
+        <p className='mb-4 text-gray-700'>{recipe.description}</p>
+      )}
       <div className='mb-4'>
         <h4 className='font-semibold mb-1 text-gray-700'>Ingredients:</h4>
         {recipe.ingredients.length > 0 ? (

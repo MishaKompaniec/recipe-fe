@@ -61,6 +61,10 @@ const RecipeModal: React.FC<RecipeModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.ingredients.length === 0) {
+      alert('Please add at least one ingredient.');
+      return;
+    }
     await onSubmit(formData);
   };
 
