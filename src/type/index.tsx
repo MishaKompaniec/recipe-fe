@@ -19,6 +19,7 @@ export interface Recipe {
   instructions: string;
   description: string;
   user?: User;
+  userId?: number;
 }
 
 export interface CreateRecipeRequest {

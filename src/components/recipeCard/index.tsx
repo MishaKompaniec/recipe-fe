@@ -24,6 +24,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
     useCreateOrUpdateRatingMutation();
   const [userRating, setUserRating] = useState<number | null>(null);
 
+  const isOwner =
+    currentUserId !== null &&
+    (recipe.user?.id === currentUserId || recipe.userId === currentUserId);
+
   useEffect(() => {
     const myRating = ratings.find((r: any) => r.userId === currentUserId);
     setUserRating(myRating ? myRating.stars : null);
@@ -65,26 +69,29 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
   return (
     <div className='relative border border-gray-300 rounded shadow hover:shadow-lg p-4 bg-white'>
-      <button
-        onClick={handleDelete}
-        disabled={deleting}
-        className='absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded'
-        aria-label='Delete recipe'
-        title='Delete recipe'
-        type='button'
-      >
-        <DeleteIcon />
-      </button>
-
-      <button
-        onClick={onEdit}
-        className='absolute top-2 right-10 text-blue-600 hover:text-blue-800 p-1 rounded'
-        aria-label='Edit recipe'
-        title='Edit recipe'
-        type='button'
-      >
-        <EditIcon />
-      </button>
+      {isOwner && (
+        <>
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className='absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded'
+            aria-label='Delete recipe'
+            title='Delete recipe'
+            type='button'
+          >
+            <DeleteIcon />
+          </button>
+          <button
+            onClick={onEdit}
+            className='absolute top-2 right-10 text-blue-600 hover:text-blue-800 p-1 rounded'
+            aria-label='Edit recipe'
+            title='Edit recipe'
+            type='button'
+          >
+            <EditIcon />
+          </button>
+        </>
+      )}
       <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
       {recipe.description && (
         <p className='mb-4 text-gray-700'>{recipe.description}</p>
