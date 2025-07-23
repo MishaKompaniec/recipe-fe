@@ -6,13 +6,7 @@ import {
   useUpdateRecipeMutation,
 } from '../../store/services/api';
 import RecipeCard from '../../components/recipeCard';
-
-type RecipeFormData = {
-  title: string;
-  description: string;
-  ingredients: string[];
-  instructions: string;
-};
+import type { RecipeFormData } from '../../type';
 
 const initialFormData: RecipeFormData = {
   title: '',
@@ -26,7 +20,7 @@ const HomePage = () => {
   const [showMyRecipes, setShowMyRecipes] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState<
-    (RecipeFormData & { id: number | string }) | null
+    (RecipeFormData & { id: number }) | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 

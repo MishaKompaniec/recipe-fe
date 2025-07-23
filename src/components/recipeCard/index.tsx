@@ -4,16 +4,7 @@ import {
   useGetRatingsByRecipeQuery,
   useCreateOrUpdateRatingMutation,
 } from '../../store/services/api';
-
-type Recipe = {
-  id: number | string;
-  title: string;
-  ingredients: string[];
-  instructions: string;
-  user?: {
-    email: string;
-  };
-};
+import type { Recipe } from '../../type';
 
 type RecipeCardProps = {
   recipe: Recipe;
@@ -22,9 +13,9 @@ type RecipeCardProps = {
 };
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
+  currentUserId,
   recipe,
   onEdit,
-  currentUserId,
 }) => {
   const [deleteRecipe, { isLoading: deleting }] = useDeleteRecipeMutation();
   const { data: ratings = [] } = useGetRatingsByRecipeQuery(Number(recipe.id));
@@ -77,21 +68,49 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         onClick={handleDelete}
         disabled={deleting}
         className='absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded'
-        aria-label='Delete recipe'
-        title='Delete recipe'
+        aria-label='Удалить рецепт'
+        title='Удалить рецепт'
         type='button'
-      ></button>
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-5 w-5'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            d='M6 18L18 6M6 6l12 12'
+          />
+        </svg>
+      </button>
 
       <button
         onClick={onEdit}
         className='absolute top-2 right-10 text-blue-600 hover:text-blue-800 p-1 rounded'
-        aria-label='Edit recipe'
-        title='Edit recipe'
+        aria-label='Редактировать рецепт'
+        title='Редактировать рецепт'
         type='button'
-      ></button>
-
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-5 w-5'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            d='M15.232 5.232l3.536 3.536M16.768 3.768a2.121 2.121 0 113 3L7 19.535 3 21l1.465-4 12.303-12.232z'
+          />
+        </svg>
+      </button>
       <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
-
       <div className='mb-4'>
         <h4 className='font-semibold mb-1 text-gray-700'>Ingredients:</h4>
         {recipe.ingredients.length > 0 ? (
@@ -104,14 +123,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           <p className='text-gray-500 italic'>No ingredients specified</p>
         )}
       </div>
-
       <div>
         <h4 className='font-semibold mb-1 text-gray-700'>Instructions:</h4>
         <p className='text-gray-800 whitespace-pre-line bg-gray-50 p-3 rounded max-h-40 overflow-y-auto'>
           {recipe.instructions || 'No instructions provided'}
         </p>
       </div>
-
       <div className='mt-4'>
         <p className='text-gray-600 mb-2'>
           Average rating: <strong>{averageRating}</strong> ⭐ ({ratings.length}{' '}
@@ -136,7 +153,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           ))}
         </div>
       </div>
-
       <div className='flex justify-between mt-4'>
         <p className='text-gray-600 text-sm mb-4'>
           Author: {recipe.user?.email}

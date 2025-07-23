@@ -1,4 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type {
+  AuthRequest,
+  AuthResponse,
+  CreateOrUpdateRatingRequest,
+  CreateRecipeRequest,
+  Rating,
+  Recipe,
+  UpdateRecipeRequest,
+  User,
+} from '../../type';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: 'http://localhost:3000/',
@@ -16,20 +26,15 @@ export const api = createApi({
   baseQuery,
   tagTypes: ['Recipe', 'Rating'],
   endpoints: (build) => ({
-    login: build.mutation<
-      { access_token: string },
-      { email: string; password: string }
-    >({
+    login: build.mutation<AuthResponse, AuthRequest>({
       query: (credentials) => ({
         url: 'auth/login',
         method: 'POST',
         body: credentials,
       }),
     }),
-    register: build.mutation<
-      { id: number; email: string },
-      { email: string; password: string }
-    >({
+
+    register: build.mutation<User, AuthRequest>({
       query: (data) => ({
         url: 'auth/register',
         method: 'POST',
@@ -37,19 +42,22 @@ export const api = createApi({
       }),
     }),
 
-    getAllRecipes: build.query({
+    getAllRecipes: build.query<Recipe[], void>({
       query: () => 'recipes',
       providesTags: ['Recipe'],
     }),
-    getMyRecipes: build.query({
+
+    getMyRecipes: build.query<Recipe[], void>({
       query: () => 'recipes/mine',
       providesTags: ['Recipe'],
     }),
-    getRecipeById: build.query({
+
+    getRecipeById: build.query<Recipe, number>({
       query: (id) => `recipes/${id}`,
       providesTags: (result, error, id) => [{ type: 'Recipe', id }],
     }),
-    createRecipe: build.mutation({
+
+    createRecipe: build.mutation<Recipe, CreateRecipeRequest>({
       query: (newRecipe) => ({
         url: 'recipes',
         method: 'POST',
@@ -57,7 +65,8 @@ export const api = createApi({
       }),
       invalidatesTags: ['Recipe'],
     }),
-    updateRecipe: build.mutation({
+
+    updateRecipe: build.mutation<Recipe, UpdateRecipeRequest>({
       query: ({ id, ...patch }) => ({
         url: `recipes/${id}`,
         method: 'PUT',
@@ -65,14 +74,16 @@ export const api = createApi({
       }),
       invalidatesTags: ['Recipe'],
     }),
-    deleteRecipe: build.mutation({
+
+    deleteRecipe: build.mutation<void, number>({
       query: (id) => ({
         url: `recipes/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Recipe'],
     }),
-    createOrUpdateRating: build.mutation({
+
+    createOrUpdateRating: build.mutation<Rating, CreateOrUpdateRatingRequest>({
       query: (ratingData) => ({
         url: 'ratings',
         method: 'POST',
@@ -81,14 +92,14 @@ export const api = createApi({
       invalidatesTags: ['Recipe', 'Rating'],
     }),
 
-    getRatingsByRecipe: build.query({
+    getRatingsByRecipe: build.query<Rating[], number>({
       query: (recipeId) => `ratings/recipe/${recipeId}`,
       providesTags: (result, error, recipeId) => [
         { type: 'Rating', id: recipeId },
       ],
     }),
 
-    deleteRating: build.mutation({
+    deleteRating: build.mutation<void, number>({
       query: (recipeId) => ({
         url: `ratings/recipe/${recipeId}`,
         method: 'DELETE',
@@ -109,4 +120,5 @@ export const {
   useDeleteRecipeMutation,
   useGetRatingsByRecipeQuery,
   useCreateOrUpdateRatingMutation,
+  useDeleteRatingMutation,
 } = api;
