@@ -139,9 +139,11 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         </div>
       </div>
       <div className='flex justify-between mt-4'>
-        <p className='text-gray-600 text-sm mb-4'>
-          Author: {recipe.user?.email}
-        </p>
+        {recipe.user?.email && (
+          <p className='text-gray-600 text-sm mb-4'>
+            Author: {recipe.user?.email}
+          </p>
+        )}
       </div>
     </div>
   );
