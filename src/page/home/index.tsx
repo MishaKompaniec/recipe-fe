@@ -7,13 +7,7 @@ import {
 } from '../../store/services/api';
 import RecipeCard from '../../components/recipeCard';
 import type { RecipeFormData } from '../../type';
-
-const initialFormData: RecipeFormData = {
-  title: '',
-  description: '',
-  ingredients: [],
-  instructions: '',
-};
+import { initialFormData } from '../../utils';
 
 const HomePage = () => {
   const [search, setSearch] = useState('');
