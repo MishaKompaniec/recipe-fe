@@ -27,13 +27,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   currentUserId,
 }) => {
   const [deleteRecipe, { isLoading: deleting }] = useDeleteRecipeMutation();
-
-  const { data: ratings = [], isLoading: ratingsLoading } =
-    useGetRatingsByRecipeQuery(Number(recipe.id));
-
+  const { data: ratings = [] } = useGetRatingsByRecipeQuery(Number(recipe.id));
   const [createOrUpdateRating, { isLoading: ratingUpdating }] =
     useCreateOrUpdateRatingMutation();
-
   const [userRating, setUserRating] = useState<number | null>(null);
 
   useEffect(() => {
@@ -52,13 +48,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   const handleDelete = async () => {
     if (
       window.confirm(
-        `Удалить рецепт "${recipe.title}"? Это действие необратимо.`
+        `Delete recipe "${recipe.title}"? This action is irreversible.`
       )
     ) {
       try {
         await deleteRecipe(recipe.id).unwrap();
       } catch (error) {
-        console.error('Ошибка удаления рецепта:', error);
+        console.error('Error deleting recipe:', error);
       }
     }
   };
@@ -71,7 +67,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         stars,
       }).unwrap();
     } catch (error) {
-      console.error('Ошибка при выставлении рейтинга:', error);
+      console.error('Error submitting rating:', error);
     }
   };
 
@@ -81,23 +77,23 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         onClick={handleDelete}
         disabled={deleting}
         className='absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded'
-        aria-label='Удалить рецепт'
-        title='Удалить рецепт'
+        aria-label='Delete recipe'
+        title='Delete recipe'
         type='button'
       ></button>
 
       <button
         onClick={onEdit}
         className='absolute top-2 right-10 text-blue-600 hover:text-blue-800 p-1 rounded'
-        aria-label='Редактировать рецепт'
-        title='Редактировать рецепт'
+        aria-label='Edit recipe'
+        title='Edit recipe'
         type='button'
       ></button>
 
       <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
 
       <div className='mb-4'>
-        <h4 className='font-semibold mb-1 text-gray-700'>Ингредиенты:</h4>
+        <h4 className='font-semibold mb-1 text-gray-700'>Ingredients:</h4>
         {recipe.ingredients.length > 0 ? (
           <ul className='list-disc list-inside text-gray-800 p-3 rounded overflow-y-auto'>
             {recipe.ingredients.map((ingredient, idx) => (
@@ -105,21 +101,21 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             ))}
           </ul>
         ) : (
-          <p className='text-gray-500 italic'>Ингредиенты не указаны</p>
+          <p className='text-gray-500 italic'>No ingredients specified</p>
         )}
       </div>
 
       <div>
-        <h4 className='font-semibold mb-1 text-gray-700'>Инструкции:</h4>
+        <h4 className='font-semibold mb-1 text-gray-700'>Instructions:</h4>
         <p className='text-gray-800 whitespace-pre-line bg-gray-50 p-3 rounded max-h-40 overflow-y-auto'>
-          {recipe.instructions || 'Инструкции не указаны'}
+          {recipe.instructions || 'No instructions provided'}
         </p>
       </div>
 
       <div className='mt-4'>
         <p className='text-gray-600 mb-2'>
-          Средний рейтинг: <strong>{averageRating}</strong> ⭐ ({ratings.length}{' '}
-          оценок)
+          Average rating: <strong>{averageRating}</strong> ⭐ ({ratings.length}{' '}
+          ratings)
         </p>
 
         <div className='flex space-x-1'>
@@ -128,7 +124,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
               key={star}
               onClick={() => handleRate(star)}
               disabled={ratingUpdating}
-              aria-label={`Поставить ${star} звёзд`}
+              aria-label={`Rate ${star} stars`}
               className={`text-xl ${
                 userRating && userRating >= star
                   ? 'text-yellow-400'
@@ -143,7 +139,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
       <div className='flex justify-between mt-4'>
         <p className='text-gray-600 text-sm mb-4'>
-          Автор: {recipe.user?.email}
+          Author: {recipe.user?.email}
         </p>
       </div>
     </div>

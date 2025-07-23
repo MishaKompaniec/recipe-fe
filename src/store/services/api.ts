@@ -16,7 +16,6 @@ export const api = createApi({
   baseQuery,
   tagTypes: ['Recipe', 'Rating'],
   endpoints: (build) => ({
-    // Auth
     login: build.mutation<
       { access_token: string },
       { email: string; password: string }

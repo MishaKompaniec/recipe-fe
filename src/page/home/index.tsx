@@ -29,7 +29,6 @@ const HomePage = () => {
     (RecipeFormData & { id: number | string }) | null
   >(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  console.log('currentUserId', currentUserId);
 
   const {
     data: allRecipes,
@@ -62,7 +61,6 @@ const HomePage = () => {
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
           .join('')
       );
-      console.log('jsonPayload', jsonPayload);
 
       return JSON.parse(jsonPayload);
     } catch {
@@ -142,7 +140,7 @@ const HomePage = () => {
       setFormData(initialFormData);
       setNewIngredient('');
     } catch (error) {
-      console.error('Ошибка при сохранении рецепта:', error);
+      console.error('Error saving recipe:', error);
     }
   };
 
@@ -150,16 +148,16 @@ const HomePage = () => {
     setEditingRecipe(recipe);
   };
 
-  if (loading) return <div className='p-4'>Загрузка рецептов...</div>;
+  if (loading) return <div className='p-4'>Loading recipes...</div>;
   if (error)
-    return <div className='p-4 text-red-600'>Ошибка загрузки рецептов</div>;
+    return <div className='p-4 text-red-600'>Failed to load recipes</div>;
 
   return (
     <div className='container mx-auto px-4 py-6'>
       <div className='flex flex-col md:flex-row justify-between items-center mb-6 gap-4'>
         <input
           type='text'
-          placeholder='Поиск рецептов...'
+          placeholder='Search recipes...'
           className='border border-gray-300 rounded px-3 py-2 w-full max-w-md'
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -169,7 +167,7 @@ const HomePage = () => {
           className='bg-lime-600 hover:bg-lime-700 text-white font-semibold px-4 py-2 rounded'
           onClick={() => setShowMyRecipes(!showMyRecipes)}
         >
-          {showMyRecipes ? 'Все рецепты' : 'Мои рецепты'}
+          {showMyRecipes ? 'All Recipes' : 'My Recipes'}
         </button>
 
         <button
@@ -179,12 +177,12 @@ const HomePage = () => {
             setModalOpen(true);
           }}
         >
-          Добавить рецепт
+          Add Recipe
         </button>
       </div>
 
       {filteredRecipes.length === 0 ? (
-        <div>Рецепты не найдены.</div>
+        <div>No recipes found.</div>
       ) : (
         <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
           {filteredRecipes.map((recipe: any) => (
@@ -202,13 +200,13 @@ const HomePage = () => {
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto'>
             <h2 className='text-2xl font-bold mb-4'>
-              {editingRecipe ? 'Редактировать рецепт' : 'Создать рецепт'}
+              {editingRecipe ? 'Edit Recipe' : 'Create Recipe'}
             </h2>
             <form onSubmit={handleSubmit} className='space-y-4'>
               <input
                 name='title'
                 type='text'
-                placeholder='Название'
+                placeholder='Title'
                 value={formData.title}
                 onChange={handleChange}
                 required
@@ -216,18 +214,18 @@ const HomePage = () => {
               />
               <textarea
                 name='description'
-                placeholder='Описание (опционально)'
+                placeholder='Description (optional)'
                 value={formData.description}
                 onChange={handleChange}
                 className='w-full border border-gray-300 rounded px-3 py-2'
               />
 
               <div>
-                <label className='block font-semibold mb-1'>Ингредиенты:</label>
+                <label className='block font-semibold mb-1'>Ingredients:</label>
                 <div className='flex gap-2 mb-2'>
                   <input
                     type='text'
-                    placeholder='Новый ингредиент'
+                    placeholder='New ingredient'
                     value={newIngredient}
                     onChange={(e) => setNewIngredient(e.target.value)}
                     className='flex-grow border border-gray-300 rounded px-3 py-2'
@@ -237,14 +235,12 @@ const HomePage = () => {
                     onClick={addIngredient}
                     className='bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded'
                   >
-                    Добавить
+                    Add
                   </button>
                 </div>
 
                 {formData.ingredients.length === 0 && (
-                  <p className='text-gray-500 italic'>
-                    Ингредиенты не добавлены
-                  </p>
+                  <p className='text-gray-500 italic'>No ingredients added</p>
                 )}
 
                 <ul className='list-disc list-inside max-h-32 overflow-y-auto border border-gray-200 rounded p-2'>
@@ -255,7 +251,7 @@ const HomePage = () => {
                         type='button'
                         onClick={() => removeIngredient(i)}
                         className='text-red-600 hover:text-red-800 font-bold ml-2'
-                        aria-label={`Удалить ингредиент ${ing}`}
+                        aria-label={`Remove ingredient ${ing}`}
                       >
                         &times;
                       </button>
@@ -266,7 +262,7 @@ const HomePage = () => {
 
               <textarea
                 name='instructions'
-                placeholder='Инструкции по приготовлению'
+                placeholder='Cooking instructions'
                 value={formData.instructions}
                 onChange={handleChange}
                 required
@@ -283,7 +279,7 @@ const HomePage = () => {
                   className='px-4 py-2 rounded border border-gray-400 hover:bg-gray-100'
                   disabled={isCreating || isUpdating}
                 >
-                  Отмена
+                  Cancel
                 </button>
                 <button
                   type='submit'
@@ -292,11 +288,11 @@ const HomePage = () => {
                 >
                   {isCreating || isUpdating
                     ? editingRecipe
-                      ? 'Сохранение...'
-                      : 'Создание...'
+                      ? 'Saving...'
+                      : 'Creating...'
                     : editingRecipe
-                    ? 'Сохранить'
-                    : 'Создать'}
+                    ? 'Save'
+                    : 'Create'}
                 </button>
               </div>
             </form>
