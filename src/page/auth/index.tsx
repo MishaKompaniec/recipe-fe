@@ -37,7 +37,9 @@ const AuthPage: FC = () => {
         const result = await login({ email, password }).unwrap();
         localStorage.setItem('token', result.access_token);
 
-        navigate('/', { replace: false });
+        setTimeout(() => {
+          navigate('/', { replace: true });
+        }, 100);
       } else {
         await register({ email, password }).unwrap();
         setFormType('login');
