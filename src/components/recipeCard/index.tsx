@@ -7,11 +7,11 @@ import {
 import type { Recipe } from '../../type';
 import { DeleteIcon, EditIcon } from '../../icons';
 
-type RecipeCardProps = {
+interface RecipeCardProps {
   recipe: Recipe;
   onEdit: () => void;
   currentUserId: number | null;
-};
+}
 
 const RecipeCard: React.FC<RecipeCardProps> = ({
   currentUserId,
