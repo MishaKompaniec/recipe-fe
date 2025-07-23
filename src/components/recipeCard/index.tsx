@@ -88,7 +88,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
       <div className='mb-4'>
         <h4 className='font-semibold mb-1 text-gray-700'>Ингредиенты:</h4>
         {recipe.ingredients.length > 0 ? (
-          <ul className='list-disc list-inside text-gray-800 bg-gray-50 p-3 rounded overflow-y-auto max-h-32'>
+          <ul className='list-disc list-inside text-gray-800 p-3 rounded overflow-y-auto'>
             {recipe.ingredients.map((ingredient, idx) => (
               <li key={idx}>{ingredient}</li>
             ))}
