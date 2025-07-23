@@ -28,6 +28,8 @@ const HomePage = () => {
   const [editingRecipe, setEditingRecipe] = useState<
     (RecipeFormData & { id: number | string }) | null
   >(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  console.log('currentUserId', currentUserId);
 
   const {
     data: allRecipes,
@@ -50,6 +52,32 @@ const HomePage = () => {
   const loading = showMyRecipes ? myLoading : allLoading;
   const error = showMyRecipes ? myError : allError;
 
+  function parseJwt(token: string) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      console.log('jsonPayload', jsonPayload);
+
+      return JSON.parse(jsonPayload);
+    } catch {
+      return null;
+    }
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const payload = parseJwt(token);
+      setCurrentUserId(payload?.sub || null);
+    }
+  }, []);
+
   const filteredRecipes = useMemo(() => {
     if (!recipes) return [];
     return recipes.filter((r: any) =>
@@ -60,7 +88,6 @@ const HomePage = () => {
   const [formData, setFormData] = useState<RecipeFormData>(initialFormData);
   const [newIngredient, setNewIngredient] = useState('');
 
-  // При открытии модалки для редактирования - подставляем данные
   useEffect(() => {
     if (editingRecipe) {
       setFormData({
@@ -106,10 +133,8 @@ const HomePage = () => {
 
     try {
       if (editingRecipe) {
-        // обновляем рецепт
         await updateRecipe({ id: editingRecipe.id, ...formData }).unwrap();
       } else {
-        // создаём новый
         await createRecipe(formData).unwrap();
       }
       setModalOpen(false);
@@ -167,6 +192,7 @@ const HomePage = () => {
               key={recipe.id}
               recipe={recipe}
               onEdit={() => handleEdit(recipe)}
+              currentUserId={currentUserId}
             />
           ))}
         </div>
@@ -196,7 +222,6 @@ const HomePage = () => {
                 className='w-full border border-gray-300 rounded px-3 py-2'
               />
 
-              {/* Ингредиенты как массив */}
               <div>
                 <label className='block font-semibold mb-1'>Ингредиенты:</label>
                 <div className='flex gap-2 mb-2'>

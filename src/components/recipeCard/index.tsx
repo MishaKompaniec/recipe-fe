@@ -1,10 +1,13 @@
-import React from 'react';
-import { useDeleteRecipeMutation } from '../../store/services/api';
+import React, { useState, useEffect } from 'react';
+import {
+  useDeleteRecipeMutation,
+  useGetRatingsByRecipeQuery,
+  useCreateOrUpdateRatingMutation,
+} from '../../store/services/api';
 
 type Recipe = {
   id: number | string;
   title: string;
-  rating: number;
   ingredients: string[];
   instructions: string;
   user?: {
@@ -15,10 +18,36 @@ type Recipe = {
 type RecipeCardProps = {
   recipe: Recipe;
   onEdit: () => void;
+  currentUserId: number | null;
 };
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
-  const [deleteRecipe, { isLoading }] = useDeleteRecipeMutation();
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  onEdit,
+  currentUserId,
+}) => {
+  const [deleteRecipe, { isLoading: deleting }] = useDeleteRecipeMutation();
+
+  const { data: ratings = [], isLoading: ratingsLoading } =
+    useGetRatingsByRecipeQuery(Number(recipe.id));
+
+  const [createOrUpdateRating, { isLoading: ratingUpdating }] =
+    useCreateOrUpdateRatingMutation();
+
+  const [userRating, setUserRating] = useState<number | null>(null);
+
+  useEffect(() => {
+    const myRating = ratings.find((r: any) => r.userId === currentUserId);
+    setUserRating(myRating ? myRating.stars : null);
+  }, [ratings, currentUserId]);
+
+  const averageRating =
+    ratings.length > 0
+      ? (
+          ratings.reduce((acc: any, r: any) => acc + r.stars, 0) /
+          ratings.length
+        ).toFixed(1)
+      : '—';
 
   const handleDelete = async () => {
     if (
@@ -34,31 +63,28 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
     }
   };
 
+  const handleRate = async (stars: number) => {
+    try {
+      setUserRating(stars);
+      await createOrUpdateRating({
+        recipeId: Number(recipe.id),
+        stars,
+      }).unwrap();
+    } catch (error) {
+      console.error('Ошибка при выставлении рейтинга:', error);
+    }
+  };
+
   return (
     <div className='relative border border-gray-300 rounded shadow hover:shadow-lg p-4 bg-white'>
       <button
         onClick={handleDelete}
-        disabled={isLoading}
+        disabled={deleting}
         className='absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded'
         aria-label='Удалить рецепт'
         title='Удалить рецепт'
         type='button'
-      >
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          className='h-5 w-5'
-          fill='none'
-          viewBox='0 0 24 24'
-          stroke='currentColor'
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            d='M6 18L18 6M6 6l12 12'
-          />
-        </svg>
-      </button>
+      ></button>
 
       <button
         onClick={onEdit}
@@ -66,22 +92,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
         aria-label='Редактировать рецепт'
         title='Редактировать рецепт'
         type='button'
-      >
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          className='h-5 w-5'
-          fill='none'
-          viewBox='0 0 24 24'
-          stroke='currentColor'
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            d='M15.232 5.232l3.536 3.536M16.768 3.768a2.121 2.121 0 113 3L7 19.535 3 21l1.465-4 12.303-12.232z'
-          />
-        </svg>
-      </button>
+      ></button>
 
       <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
 
@@ -105,8 +116,32 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onEdit }) => {
         </p>
       </div>
 
+      <div className='mt-4'>
+        <p className='text-gray-600 mb-2'>
+          Средний рейтинг: <strong>{averageRating}</strong> ⭐ ({ratings.length}{' '}
+          оценок)
+        </p>
+
+        <div className='flex space-x-1'>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              onClick={() => handleRate(star)}
+              disabled={ratingUpdating}
+              aria-label={`Поставить ${star} звёзд`}
+              className={`text-xl ${
+                userRating && userRating >= star
+                  ? 'text-yellow-400'
+                  : 'text-gray-300'
+              } hover:text-yellow-500 transition`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className='flex justify-between mt-4'>
-        <p className='text-yellow-500 mb-2'>Рейтинг: {recipe.rating} ⭐</p>
         <p className='text-gray-600 text-sm mb-4'>
           Автор: {recipe.user?.email}
         </p>

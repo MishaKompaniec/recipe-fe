@@ -14,7 +14,7 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['Recipe'],
+  tagTypes: ['Recipe', 'Rating'],
   endpoints: (build) => ({
     // Auth
     login: build.mutation<
@@ -73,6 +73,29 @@ export const api = createApi({
       }),
       invalidatesTags: ['Recipe'],
     }),
+    createOrUpdateRating: build.mutation({
+      query: (ratingData) => ({
+        url: 'ratings',
+        method: 'POST',
+        body: ratingData,
+      }),
+      invalidatesTags: ['Recipe', 'Rating'],
+    }),
+
+    getRatingsByRecipe: build.query({
+      query: (recipeId) => `ratings/recipe/${recipeId}`,
+      providesTags: (result, error, recipeId) => [
+        { type: 'Rating', id: recipeId },
+      ],
+    }),
+
+    deleteRating: build.mutation({
+      query: (recipeId) => ({
+        url: `ratings/recipe/${recipeId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Recipe'],
+    }),
   }),
 });
 
@@ -85,4 +108,6 @@ export const {
   useCreateRecipeMutation,
   useUpdateRecipeMutation,
   useDeleteRecipeMutation,
+  useGetRatingsByRecipeQuery,
+  useCreateOrUpdateRatingMutation,
 } = api;
