@@ -92,7 +92,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           </button>
         </>
       )}
-      <h3 className='text-lg font-bold mb-2'>{recipe.title}</h3>
+      <h3 className='text-lg font-bold mb-2 pr-12'>{recipe.title}</h3>
       {recipe.description && (
         <p className='mb-4 text-gray-700'>{recipe.description}</p>
       )}

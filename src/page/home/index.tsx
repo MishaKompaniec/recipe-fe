@@ -130,7 +130,7 @@ const HomePage = () => {
           {filteredRecipes.length === 0 ? (
             <div>No recipes found.</div>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {filteredRecipes.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
