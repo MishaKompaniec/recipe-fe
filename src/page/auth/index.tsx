@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import {
   useLoginMutation,
   useRegisterMutation,
 } from '../../store/services/api';
 import { useNavigate } from 'react-router-dom';
 
-const AuthPage: React.FC = () => {
+const AuthPage: FC = () => {
   const navigate = useNavigate();
   const [formType, setFormType] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -24,11 +24,11 @@ const AuthPage: React.FC = () => {
     setConfirmPassword('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (formType === 'register' && password !== confirmPassword) {
-      alert('Пароли не совпадают');
+      alert('Passwords do not match');
       return;
     }
 
@@ -36,7 +36,8 @@ const AuthPage: React.FC = () => {
       if (formType === 'login') {
         const result = await login({ email, password }).unwrap();
         localStorage.setItem('token', result.access_token);
-        navigate('/');
+
+        navigate('/', { replace: false });
       } else {
         await register({ email, password }).unwrap();
         setFormType('login');
@@ -46,8 +47,7 @@ const AuthPage: React.FC = () => {
       }
     } catch (error: any) {
       alert(
-        'Ошибка: ' +
-          (error.data?.message || error.error || 'Неизвестная ошибка')
+        'Error: ' + (error.data?.message || error.error || 'Unknown error')
       );
     }
   };
@@ -56,7 +56,7 @@ const AuthPage: React.FC = () => {
     <div className='min-h-screen bg-gradient-to-br from-yellow-100 via-yellow-50 to-white flex items-center justify-center px-4 py-12'>
       <div className='bg-white rounded-3xl shadow-xl w-full max-w-md p-10'>
         <h2 className='text-3xl font-extrabold mb-8 text-center text-amber-600 drop-shadow-md'>
-          {formType === 'login' ? 'Добро пожаловать!' : 'Создайте аккаунт'}
+          {formType === 'login' ? 'Welcome Back!' : 'Create an Account'}
         </h2>
 
         <form onSubmit={handleSubmit} className='space-y-6'>
@@ -81,7 +81,7 @@ const AuthPage: React.FC = () => {
 
           <label htmlFor='password' className='block'>
             <span className='text-gray-700 font-semibold mb-1 block'>
-              Пароль
+              Password
             </span>
             <input
               id='password'
@@ -103,7 +103,7 @@ const AuthPage: React.FC = () => {
           {formType === 'register' && (
             <label htmlFor='confirmPassword' className='block'>
               <span className='text-gray-700 font-semibold mb-1 block'>
-                Подтверждение пароля
+                Confirm Password
               </span>
               <input
                 id='confirmPassword'
@@ -127,17 +127,19 @@ const AuthPage: React.FC = () => {
             className='w-full bg-lime-600 hover:bg-lime-700 text-white font-bold py-3 rounded-lg shadow-md
              transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            {formType === 'login' ? 'Войти' : 'Зарегистрироваться'}
+            {formType === 'login' ? 'Log In' : 'Register'}
           </button>
         </form>
 
         <p className='mt-6 text-center text-gray-700 font-medium select-none'>
-          {formType === 'login' ? 'Нет аккаунта?' : 'Уже есть аккаунт?'}{' '}
+          {formType === 'login'
+            ? "Don't have an account?"
+            : 'Already have an account?'}{' '}
           <button
             onClick={switchForm}
             className='text-lime-600 hover:text-lime-700 hover:underline focus:outline-none'
           >
-            {formType === 'login' ? 'Зарегистрируйтесь' : 'Войдите'}
+            {formType === 'login' ? 'Register' : 'Log In'}
           </button>
         </p>
 
@@ -145,7 +147,7 @@ const AuthPage: React.FC = () => {
           <p className='mt-4 text-center text-red-600 font-semibold'>
             {(loginError as any)?.data?.message ||
               (registerError as any)?.data?.message ||
-              'Ошибка запроса'}
+              'Request error'}
           </p>
         )}
       </div>
